@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= APP_TITLE ?></title>
-    <meta name="cpa-canonical-url" content="<?= CANONICAL_URL ?>">
-    <meta name="cpa-workspace-domain" content="<?= WORKSPACE_DOMAIN ?>">
+    <title>CPA Automation - LLM Governance Operating Model</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -3028,33 +3026,36 @@
 
     <script>
         (function enforceCanonicalAppsScriptRoute() {
-            const canonicalUrl = document.querySelector('meta[name="cpa-canonical-url"]')?.content || "";
-            const workspaceDomain = (document.querySelector('meta[name="cpa-workspace-domain"]')?.content || "").toLowerCase();
-
-            if (!canonicalUrl || canonicalUrl.includes("<?") || !canonicalUrl.startsWith("https://script.google.com/macros/s/")) {
-                return;
-            }
-
             let currentUrl;
-            let targetUrl;
 
             try {
                 currentUrl = new URL(window.location.href);
-                targetUrl = new URL(canonicalUrl);
             } catch (_error) {
                 return;
             }
 
             if (currentUrl.hostname !== "script.google.com") return;
 
-            const domainScopedRoute = currentUrl.pathname.match(/^\/a\/macros\/([^/]+)\//i);
-            const accountScopedRoute = /^\/macros\/u\/\d+\/s\//i.test(currentUrl.pathname);
-            const cleanRoute = /^\/macros\/s\//i.test(currentUrl.pathname);
-            const wrongWorkspaceRoute = domainScopedRoute && workspaceDomain && domainScopedRoute[1].toLowerCase() !== workspaceDomain;
-            const needsRedirect = wrongWorkspaceRoute || accountScopedRoute || (cleanRoute && currentUrl.searchParams.has("authuser"));
+            const routePatterns = [
+                /^\/a\/macros\/[^/]+\/s\/([^/]+)\/(exec|dev)$/i,
+                /^\/a\/[^/]+\/macros\/s\/([^/]+)\/(exec|dev)$/i,
+                /^\/macros\/u\/\d+\/s\/([^/]+)\/(exec|dev)$/i,
+                /^\/macros\/s\/([^/]+)\/(exec|dev)$/i
+            ];
+            const routeMatch = routePatterns
+                .map((pattern) => currentUrl.pathname.match(pattern))
+                .find(Boolean);
+
+            if (!routeMatch) return;
+
+            const [, deploymentId, mode] = routeMatch;
+            const cleanPath = `/macros/s/${deploymentId}/${mode}`;
+            const needsRedirect = currentUrl.pathname !== cleanPath || currentUrl.searchParams.has("authuser");
 
             if (!needsRedirect) return;
 
+            const targetUrl = new URL(window.location.origin);
+            targetUrl.pathname = cleanPath;
             currentUrl.searchParams.forEach((value, key) => {
                 if (key.toLowerCase() !== "authuser") {
                     targetUrl.searchParams.set(key, value);

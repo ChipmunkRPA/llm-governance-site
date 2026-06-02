@@ -14,6 +14,8 @@ This folder is a Google Apps Script web app version of the slide deck.
 2. Make sure you are signed into the Google Workspace account that should own the deployment, for example `cpaautomation.ai`.
 3. Create a new Apps Script project.
 4. Add `Code.gs`, `index.html`, and `appsscript.json` from this folder.
+   - `Code.gs` must be a script file.
+   - `index.html` must be an HTML file. Do not paste the HTML into `Code.gs`.
 5. In Project Settings, enable "Show appsscript.json manifest file in editor" if needed.
 6. Click `Deploy` > `New deployment`.
 7. Select type `Web app`.
@@ -47,12 +49,6 @@ https://script.google.com/a/macros/chipmunkrpa.com/s/<DEPLOYMENT_ID>/exec
 That domain mismatch can show a Google Drive "unable to open the file" / "Page Not Found" error even when the script deployment itself is valid.
 
 The site includes a canonical route guard that redirects account-scoped URLs back to the clean public URL when the request reaches the web app. It cannot redirect a request that Google rejects before Apps Script runs, so a Drive error page still means the browser is using the wrong Google account/domain or the Workspace admin has blocked anonymous web app access.
-
-To print the clean public URL from Apps Script, run:
-
-```javascript
-logPublicWebAppUrl();
-```
 
 The manifest is already configured with:
 
