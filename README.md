@@ -24,6 +24,8 @@ This folder is a Google Apps Script web app version of the slide deck.
 
 The resulting `/exec` URL is the public site URL.
 
+After changing any file in this repo, redeploy the Apps Script web app or update the existing deployment to a new version. Apps Script serves the deployed version, not the latest GitHub commit.
+
 For a public link, prefer the clean deployment URL:
 
 ```text
@@ -43,6 +45,14 @@ https://script.google.com/a/macros/chipmunkrpa.com/s/<DEPLOYMENT_ID>/exec
 ```
 
 That domain mismatch can show a Google Drive "unable to open the file" / "Page Not Found" error even when the script deployment itself is valid.
+
+The site includes a canonical route guard that redirects account-scoped URLs back to the clean public URL when the request reaches the web app. It cannot redirect a request that Google rejects before Apps Script runs, so a Drive error page still means the browser is using the wrong Google account/domain or the Workspace admin has blocked anonymous web app access.
+
+To print the clean public URL from Apps Script, run:
+
+```javascript
+logPublicWebAppUrl();
+```
 
 The manifest is already configured with:
 
